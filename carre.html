@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation de Carré avec Particules</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000000;
+            color: #ffffff;
+            overflow: hidden; /* Hide particles that go off-screen */
+        }
+        #main-container {
+            display: flex;
+            gap: 2em; /* Space between the two squares */
+        }
+        .container {
+            position: relative;
+            width: 10em;
+            height: 10em;
+        }
+        .animated-square {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .animated-square path {
+            fill: transparent; /* Make the square transparent */
+            stroke: #ffffff;
+            stroke-width: 2;
+        }
+        .particle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background-color: yellow;
+            border-radius: 50%;
+            filter: blur(2.4px);
+            opacity: 1;
+            pointer-events: none;
+        }
+
+        @keyframes burst {
+            from {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 1;
+            }
+            to {
+                transform: translate(var(--x), var(--y)) scale(1);
+                opacity: 0;
+            }
+        }
+
+        @keyframes implode {
+            from {
+                transform: translate(var(--x), var(--y)) scale(1);
+                opacity: 1;
+            }
+            to {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Animation de périmètre avec particules inversées</h1>
+    <p>À gauche, les particules arrivent au centre. À droite, elles en partent.</p>
+    <div id="main-container">
+        <div id="container1" class="container">
+            <div class="particles-container"></div>
+            <svg class="animated-square" viewBox="0 0 100 100">
+                <path>
+                    <animate attributeName="d"
+                        dur="3s"
+                        repeatCount="indefinite"
+                        keyTimes="0; 0.5; 1"
+                        calcMode="spline"
+                        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1"
+                        values="
+                            M 10 10 Q 50 10 90 10 Q 90 50 90 90 Q 50 90 10 90 Q 10 50 10 10 Z;
+                            M 10 10 Q 50 50 90 10 Q 50 50 90 90 Q 50 50 10 90 Q 50 50 10 10 Z;
+                            M 10 10 Q 50 10 90 10 Q 90 50 90 90 Q 50 90 10 90 Q 10 50 10 10 Z
+                        "
+                    />
+                </path>
+            </svg>
+        </div>
+        <div id="container2" class="container">
+            <div class="particles-container"></div>
+            <svg class="animated-square" viewBox="0 0 100 100">
+                <path>
+                    <animate attributeName="d"
+                        dur="3s"
+                        repeatCount="indefinite"
+                        keyTimes="0; 0.5; 1"
+                        calcMode="spline"
+                        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1"
+                        values="
+                            M 20 20 Q 50 20 80 20 Q 80 50 80 80 Q 50 80 20 80 Q 20 50 20 20 Z;
+                            M 20 20 Q 50 0 80 20 Q 100 50 80 80 Q 50 100 20 80 Q 0 50 20 20 Z;
+                            M 20 20 Q 50 20 80 20 Q 80 50 80 80 Q 50 80 20 80 Q 20 50 20 20 Z
+                        "
+                    />
+                </path>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        function setupSquareAnimation(containerId, particleAnimationType) {
+            const container = document.getElementById(containerId);
+            const particlesContainer = container.querySelector('.particles-container');
+            const animationDuration = 3000;
+            const particleCount = 20;
+
+            function createParticleEffect() {
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = 80 + Math.random() * 40;
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+
+                    particle.style.setProperty('--x', `${x}px`);
+                    particle.style.setProperty('--y', `${y}px`);
+                    
+                    particle.style.animation = `${particleAnimationType} 1.2s ease-in-out forwards`;
+
+                    particlesContainer.appendChild(particle);
+
+                    particle.addEventListener('animationend', () => {
+                        particle.remove();
+                    });
+                }
+            }
+
+            const particleEffectTriggerTime = animationDuration / 2;
+
+            setTimeout(() => {
+                createParticleEffect();
+                setInterval(createParticleEffect, animationDuration);
+            }, particleEffectTriggerTime);
+        }
+
+        // Left square (container1) has particles departing from the center ('burst')
+        setupSquareAnimation('container1', 'burst');
+        // Right square (container2) has particles arriving at the center ('implode')
+        setupSquareAnimation('container2', 'implode');
+    </script>
+</body>
+</html>

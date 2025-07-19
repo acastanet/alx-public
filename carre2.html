@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation de Carré avec Particules</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000000;
+            color: #ffffff;
+            overflow: hidden; /* Hide particles that go off-screen */
+        }
+        #main-container {
+            display: flex;
+            gap: 2em; /* Space between the two squares */
+        }
+        .container {
+            position: relative;
+            width: 10em;
+            height: 10em;
+        }
+        .animated-square {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .animated-square path {
+            fill: transparent; /* Make the square transparent */
+            stroke: #ffffff;
+            stroke-width: 2;
+        }
+        .particle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            /* Color will be set by JS */
+            border-radius: 50%;
+            filter: blur(2.4px);
+            opacity: 1;
+            pointer-events: none;
+        }
+
+        @keyframes burst {
+            0% {
+                transform: translate(-50%, -50%) scale(0.3);
+                opacity: var(--opacity);
+            }
+            80% {
+                transform: translate(var(--x), var(--y)) scale(var(--scale));
+                opacity: var(--opacity);
+            }
+            100% {
+                transform: translate(var(--x), var(--y)) scale(var(--scale));
+                opacity: 0;
+            }
+        }
+
+        @keyframes implode {
+            0% {
+                transform: translate(var(--x), var(--y)) scale(0.3);
+                opacity: var(--opacity);
+            }
+            80% {
+                transform: translate(-50%, -50%) scale(var(--scale));
+                opacity: var(--opacity);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(var(--scale));
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Animation de périmètre avec particules inversées</h1>
+    <p>À gauche, les particules arrivent au centre. À droite, elles en partent.</p>
+    <div id="main-container">
+        <div id="container1" class="container">
+            <div class="particles-container"></div>
+            <svg class="animated-square" viewBox="0 0 100 100">
+                <path>
+                    <animate attributeName="d"
+                        dur="3s"
+                        repeatCount="indefinite"
+                        keyTimes="0; 0.5; 1"
+                        calcMode="spline"
+                        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1"
+                        values="
+                            M 20 20 Q 50 20 80 20 Q 80 50 80 80 Q 50 80 20 80 Q 20 50 20 20 Z;
+                            M 20 20 Q 50 50 80 20 Q 50 50 80 80 Q 50 50 20 80 Q 50 50 20 20 Z;
+                            M 20 20 Q 50 20 80 20 Q 80 50 80 80 Q 50 80 20 80 Q 20 50 20 20 Z
+                        "
+                    />
+                </path>
+            </svg>
+        </div>
+        <div id="container2" class="container">
+            <div class="particles-container"></div>
+            <svg class="animated-square" viewBox="0 0 100 100">
+                <path>
+                    <animate attributeName="d"
+                        dur="3s"
+                        repeatCount="indefinite"
+                        keyTimes="0; 0.5; 1"
+                        calcMode="spline"
+                        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1"
+                        values="
+                            M 20 20 Q 50 20 80 20 Q 80 50 80 80 Q 50 80 20 80 Q 20 50 20 20 Z;
+                            M 20 20 Q 50 0 80 20 Q 100 50 80 80 Q 50 100 20 80 Q 0 50 20 20 Z;
+                            M 20 20 Q 50 20 80 20 Q 80 50 80 80 Q 50 80 20 80 Q 20 50 20 20 Z
+                        "
+                    />
+                </path>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        function setupSquareAnimation(containerId, particleAnimationType) {
+            const container = document.getElementById(containerId);
+            const particlesContainer = container.querySelector('.particles-container');
+            const animationDuration = 3000;
+            const particleCount = 25; // Increased particle count for more visual effect
+            const colors = ['#FF4500', '#FFA500', '#FFD700', '#FFFF00']; // Red-Orange, Orange, Gold, Yellow
+
+            function createParticleEffect() {
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+
+                    // Randomize properties
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = 80 + Math.random() * 40;
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+                    const scale = 0.8 + Math.random() * 0.7;
+                    const opacity = 0.6 + Math.random() * 0.4;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+
+                    // Apply randomized properties via CSS custom properties
+                    particle.style.setProperty('--x', `${x}px`);
+                    particle.style.setProperty('--y', `${y}px`);
+                    particle.style.setProperty('--scale', scale);
+                    particle.style.setProperty('--opacity', opacity);
+                    particle.style.backgroundColor = color;
+                    
+                    particle.style.animation = `${particleAnimationType} 1.2s ease-in-out forwards`;
+
+                    particlesContainer.appendChild(particle);
+
+                    particle.addEventListener('animationend', () => {
+                        particle.remove();
+                    });
+                }
+            }
+
+            const particleEffectTriggerTime = animationDuration / 2;
+
+            setTimeout(() => {
+                createParticleEffect();
+                setInterval(createParticleEffect, animationDuration);
+            }, particleEffectTriggerTime);
+        }
+
+        // Left square (container1) has particles departing from the center ('burst')
+        setupSquareAnimation('container1', 'burst');
+        // Right square (container2) has particles arriving at the center ('implode')
+        setupSquareAnimation('container2', 'implode');
+    </script>
+</body>
+</html>

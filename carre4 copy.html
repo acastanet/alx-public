@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation de Formes avec Particules</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000000;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        #main-container {
+            display: flex;
+            gap: 2em;
+        }
+        .container {
+            position: relative;
+            width: 10em;
+            height: 10em;
+        }
+        .animated-shape {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .animated-shape path {
+            fill: transparent;
+            stroke: #ffffff;
+            stroke-width: 2;
+        }
+        .particle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            filter: blur(2.4px);
+            pointer-events: none;
+        }
+
+        @keyframes implode {
+            0% {
+                transform: translate(var(--x), var(--y)) scale(0.3);
+                opacity: var(--opacity);
+            }
+            80% {
+                transform: translate(-50%, -50%) scale(var(--scale));
+                opacity: var(--opacity);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(var(--scale));
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Variations d'animations de rétrécissement</h1>
+    <div id="main-container">
+        <!-- Square to Circle -->
+        <div id="container1" class="container">
+            <div class="particles-container"></div>
+            <svg class="animated-shape" viewBox="0 0 100 100">
+                <path>
+                    <animate attributeName="d" dur="4s" repeatCount="indefinite" keyTimes="0; 0.5; 1" calcMode="spline" keySplines="0.42 0 0.58 1; 0.42 0 0.58 1" values="M 10 50 C 10 10, 10 10, 50 10 C 90 10, 90 10, 90 50 C 90 90, 90 90, 50 90 C 10 90, 10 90, 10 50 Z; M 25 50 C 25 36.193, 36.193 25, 50 25 C 63.807 25, 75 36.193, 75 50 C 75 63.807, 63.807 75, 50 75 C 36.193 75, 25 63.807, 25 50 Z; M 10 50 C 10 10, 10 10, 50 10 C 90 10, 90 10, 90 50 C 90 90, 90 90, 50 90 C 10 90, 10 90, 10 50 Z"/>
+                </path>
+            </svg>
+        </div>
+        <!-- Square to Square -->
+        <div id="container2" class="container">
+            <div class="particles-container"></div>
+            <svg class="animated-shape" viewBox="0 0 100 100">
+                <path>
+                    <animate attributeName="d" dur="4s" repeatCount="indefinite" keyTimes="0; 0.5; 1" calcMode="spline" keySplines="0.42 0 0.58 1; 0.42 0 0.58 1" values="M 10 10 L 90 10 L 90 90 L 10 90 Z; M 35 35 L 65 35 L 65 65 L 35 65 Z; M 10 10 L 90 10 L 90 90 L 10 90 Z"/>
+                </path>
+            </svg>
+        </div>
+        <!-- Right-Angle Square to Circle -->
+        <div id="container3" class="container">
+            <div class="particles-container"></div>
+            <svg class="animated-shape" viewBox="0 0 100 100">
+                <path>
+                    <animate attributeName="d" dur="4s" repeatCount="indefinite" keyTimes="0; 0.5; 1" calcMode="spline" keySplines="0.42 0 0.58 1; 0.42 0 0.58 1" values="M 10 50 C 10 10, 10 10, 50 10 C 90 10, 90 10, 90 50 C 90 90, 90 90, 50 90 C 10 90, 10 90, 10 50 Z; M 25 50 C 25 36.193, 36.193 25, 50 25 C 63.807 25, 75 36.193, 75 50 C 75 63.807, 63.807 75, 50 75 C 36.193 75, 25 63.807, 25 50 Z; M 10 50 C 10 10, 10 10, 50 10 C 90 10, 90 10, 90 50 C 90 90, 90 90, 50 90 C 10 90, 10 90, 10 50 Z"/>
+                </path>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        function setupAnimation(containerId, particleAnimationType) {
+            const container = document.getElementById(containerId);
+            const particlesContainer = container.querySelector('.particles-container');
+            const animationDuration = 4000;
+            const particleCount = 30;
+            const colors = ['#FF4500', '#FFA500', '#FFD700', '#FFFF00'];
+
+            function createParticleEffect() {
+                for (let i = 0; i < particleCount; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.classList.add('particle');
+
+                        const scale = 0.8 + Math.random() * 0.7;
+                        const opacity = 0.6 + Math.random() * 0.4;
+                        const color = colors[Math.floor(Math.random() * colors.length)];
+
+                        particle.style.setProperty('--scale', scale);
+                        particle.style.setProperty('--opacity', opacity);
+                        particle.style.backgroundColor = color;
+
+                        const angle = Math.random() * 2 * Math.PI;
+                        const radius = 80 + Math.random() * 40;
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+
+                        particle.style.setProperty('--x', `${x}px`);
+                        particle.style.setProperty('--y', `${y}px`);
+                        
+                        particle.style.animation = `${particleAnimationType} 1.5s ease-in-out forwards`;
+                        
+                        particlesContainer.appendChild(particle);
+
+                        particle.addEventListener('animationend', () => {
+                            particle.remove();
+                        });
+                    }, i * 30);
+                }
+            }
+
+            const particleEffectTriggerTime = animationDuration / 2;
+
+            setTimeout(() => {
+                createParticleEffect();
+                setInterval(createParticleEffect, animationDuration);
+            }, particleEffectTriggerTime);
+        }
+
+        setupAnimation('container1', 'implode');
+        setupAnimation('container2', 'implode');
+        setupAnimation('container3', 'implode');
+    </script>
+</body>
+</html>
